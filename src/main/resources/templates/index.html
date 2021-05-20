@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>XMU校友信息维护</title>
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.2/css/all.css" rel="stylesheet">
+  <link href="https://cdn.bootcdn.net/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.css" rel="stylesheet">
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
+      <div class="container">
+        <a href="" class="nav navbar-brand"><b>XMU校友信息维护</b></a>
+      </div>
+      <div class="mr-auto">
+        <a href="javascript:logout();">登出</a>
+      </div>
+    </nav>
+    <div id="header" style="height: 56px;"></div>
+    <div class="jumptron jumptron-fluid col-10 offset-1">
+      <div class="mt-5 mb-4 col-12 row">
+        <input id="no" name="no" class="form-control col-8" placeholder="输入校友学号" required="" autofocus="">
+        <div class="btn btn-primary col-2" onclick="search()">检索</div>
+        <div id="add-alumni-modal-button" class="btn btn-success col-2">新增</div>
+      </div>
+      <a href="javascript:refresh()">刷新</a>
+      <div class="modal fade" id="modal-add-alumni" tabindex="-1" aria-labelledby="modal-add-alumni-label"
+        aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modal-add-alumni-label">新增校友</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <input type="text" class="form-control" id="add-name" placeholder="姓名（必填）" required="required" value="">
+              <input type="text" class="form-control" id="add-no" placeholder="学号（必填）" required="required" value="">
+              <input type="text" class="form-control" id="add-gender" placeholder="性别（必填）" required="required" value="">
+              <input type="text" class="form-control" id="add-department" placeholder="学院" value="">
+              <input type="text" class="form-control" id="add-major" placeholder="专业" value="">
+              <input type="text" class="form-control" id="add-grade" placeholder="年级" value="">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+              <button type="button" class="btn btn-primary" id="add-alumni">保存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="modal-edit-alumni" tabindex="-1" aria-labelledby="modal-edit-alumni-label"
+        aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modal-edit-alumni-label">编辑校友</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <input type="text" class="form-control" id="edit-name" placeholder="姓名（必填）" required="required" value="">
+              <input type="text" class="form-control" id="edit-no" placeholder="学号（必填）" required="required"
+                disabled="disabled" value="">
+              <input type="text" class="form-control" id="edit-gender" placeholder="性别（必填）" required="required"
+                value="">
+              <input type="text" class="form-control" id="edit-department" placeholder="学院" value="">
+              <input type="text" class="form-control" id="edit-major" placeholder="专业" value="">
+              <input type="text" class="form-control" id="edit-grade" placeholder="年级" value="">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+              <button type="button" class="btn btn-primary" id="edit-alumni">保存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <table class="table">
+          <tbody id="res">
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <footer class="footer text-center">
+      <p class="mt-5 mb-3 text-muted">Enatsu Studio © 2021</p>
+    </footer>
+  </div>
+  <script>
+    /*<![CDATA[*/
+    $('#add-alumni-modal-button').click(function () {
+      $('#modal-add-alumni').modal('show')
+    });
+
+    function edit(id) {
+      $('#modal-edit-alumni').modal('show')
+    };
+
+    $('#add-alumni').click(function () {
+      $(this).parents('.modal').modal('hide')
+      if ($('#add-name').val() && $('#add-no') && $('#add-gender')) {
+        $.ajax({
+          url: '/alumni',
+          type: 'POST',
+          data: JSON.stringify({
+            name: $('#add-name').val(),
+            no: $('#add-no').val(),
+            gender: $('#add-gender').val(),
+            department: $('#add-department').val(),
+            major: $('#add-major').val(),
+            grade: $('#add-grade').val(),
+          }),
+
+          cache: false,
+          processData: false,
+          contentType: "application/json",
+          success: function (data) {
+            console.log(data);
+            //addSuccessAlert(data, true);
+            setTimeout(function () { refresh() }, 1000);
+          },
+          error: function (err) {
+            console.error(err);
+            //addSuccessAlert(err, false);
+            setTimeout(function () { refresh() }, 1000);
+          }
+        });
+
+      }
+    });
+
+    $('#edit-alumni').click(function () {
+      $(this).parents('.modal').modal('hide')
+      if ($('#edit-name').val() && $('#edit-no') && $('#edit-gender')) {
+        $.ajax({
+          url: '/alumni',
+          type: 'PUT',
+          data: JSON.stringify({
+            name: $('#edit-name').val(),
+            no: $('#edit-no').val(),
+            gender: $('#edit-gender').val(),
+            department: $('#edit-department').val(),
+            major: $('#edit-major').val(),
+            grade: $('#edit-grade').val(),
+          }),
+
+          cache: false,
+          processData: false,
+          contentType: "application/json",
+          success: function (data) {
+            console.log(data);
+            //addSuccessAlert(data, true);
+            setTimeout(function () { refresh() }, 1000);
+          },
+          error: function (err) {
+            console.error(err);
+            //addSuccessAlert(err, false);
+            setTimeout(function () { refresh() }, 1000);
+          }
+        });
+
+      }
+    });
+
+
+    function logout() {
+      $.ajax({
+        url: '/user/logout',
+        type: 'DELETE',
+        contentType: "application/json",
+        success: function (data) {
+          window.location.href = '/';
+        },
+        error: function (err) {
+          console.error(err);
+
+        }
+      });
+    }
+
+    function refresh() {
+      $('#res').empty();
+      $('#add-name').val();
+      $('#add-no').val();
+      $('#add-gender').val();
+      $('#add-department').val();
+      $('#add-grade').val();
+      $('#add-grade').val();
+      $('#edit-name').val();
+      $('#edit-no').val();
+      $('#edit-gender').val();
+      $('#edit-department').val();
+      $('#edit-grade').val();
+      $('#edit-grade').val();
+      search();
+    }
+
+    function search() {
+      if ($('#no').val() != '') {
+        $.ajax({
+          url: '/alumni?no=' + $('#no').val(),
+          type: 'GET',
+          contentType: "application/json",
+          success: function (data) {
+            console.log(data);
+            if (data.state == 200 && data.alumni) {
+              $('#edit-name').val(data.alumni.name);
+              $('#edit-no').val(data.alumni.no);
+              $('#edit-gender').val(data.alumni.gender);
+              $('#edit-department').val(data.alumni.department);
+              $('#edit-grade').val(data.alumni.major);
+              $('#edit-grade').val(data.alumni.grade);
+              var newTr = $('<tr><th>姓名</th><th>学号</th><th>性别</th><th>学院</th>' +
+                '<th>专业</th><th>年级</th><th>操作</th></tr>' +
+                '<tr><td>' + data.alumni.name + '</td>' +
+                '<td>' + data.alumni.no + '</td>' +
+                '<td>' + data.alumni.gender + '</td>' +
+                '<td>' + data.alumni.department + '</td>' +
+                '<td>' + data.alumni.major + '</td>' +
+                '<td>' + data.alumni.grade + '</td>' +
+                '<td><a href="javascript:edit(' + data.alumni.id + ')">编辑</a></td>' +
+                '</tr>');
+              $('#res').empty();
+              $('#res').append(newTr);
+            }
+            else {
+              $('#tips').val('找不到');
+            }
+          },
+          error: function (err) {
+            console.error(err);
+
+          }
+        });
+      }
+
+    }
+    /*]]>*/
+  </script>
+</body>
+
+</html>

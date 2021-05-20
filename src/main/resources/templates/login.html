@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>登录 - XMU校友信息维护</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.2/css/all.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
+        <div class="container">
+            <a href="" class="nav navbar-brand"><b>XMU校友信息维护</b></a>
+        </div>
+    </nav>
+    <div id="header" style="height: 56px;"></div>
+    <div class="jumptron jumptron-fluid col-8 offset-2">
+        <div class="mt-5 mb-4">
+            <label class="sr-only">用户名</label>
+            <input id="userName" name="userName" class="form-control" placeholder="用户名" required="" autofocus="">
+        </div>
+        <div class="mt-4 mb-4">
+            <label class="sr-only">密码</label>
+            <input id="password" name="password" class="form-control" placeholder="密码" required="" type="password">
+        </div>
+        <button class="btn btn-lg btn-primary btn-block mt-4 mb-4" type="submit" data-th-bgcolor="red" onclick="login()">登入</button>
+        <p id="tips" class="text-center mt-4 mb-4" style="color: red;"></p>
+    </div>
+    <footer class="footer text-center">
+        <p class="mt-5 mb-3 text-muted">Enatsu Studio © 2021</p>
+    </footer>
+</div>
+<script>
+    /*<![CDATA[*/
+    function login(){
+        $.ajax({
+            url: '/user/login',
+            type: 'POST',
+            contentType: "application/json",
+            data: JSON.stringify({ userName: $('#userName').val(), password: $('#password').val()  }),
+            success: function (data) {
+					console.log(data);
+					if(data.state==200){
+					    window.location.href='/app';
+					}
+                    else{
+                        $('#tips').text('用户名或密码不正确');
+                    }
+				},
+				error: function (err) {
+					console.error(err);
+				}
+        });
+    }
+    /*]]>*/
+</script>
+</body>
+
+</html>
